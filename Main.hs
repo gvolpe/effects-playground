@@ -9,6 +9,8 @@
 {-# LANGUAGE TypeOperators              #-}
 {-# LANGUAGE UndecidableInstances       #-}
 
+-- Slight modification from https://github.com/fused-effects/fused-effects/blob/master/examples/Teletype.hs
+
 module Main where
 
 import           Prelude                 hiding ( read )
@@ -21,6 +23,9 @@ import           Control.Effect.Writer
 import           Control.Monad.IO.Class
 import           Data.Coerce
 
+-- Our effect type modeling reads and writes as a higher-order Functor
+-- m: models the embedded effect
+-- k: models the remainder of the computation (or continuation)
 data Teletype (m :: * -> *) k
   = Read (String -> k)
   | Write String k
@@ -32,23 +37,29 @@ read = send (Read pure)
 write :: (Member Teletype sig, Carrier sig m) => String -> m ()
 write s = send (Write s (pure ()))
 
-runTeletypeIO :: TeletypeIOC m a -> m a
-runTeletypeIO = runTeletypeIOC
-
+-- A newtype defining IO computations over Teletype
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving newtype (Applicative, Functor, Monad, MonadIO)
 
+runTeletypeIO :: TeletypeIOC m a -> m a
+runTeletypeIO = runTeletypeIOC
+
+-- We can only handle Read and Write. Any other effects have to be handled by other instances.
+-- eff: handles effectful computations
+-- sig: represents the remainder of effects
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
   eff (L (Read k   )) = liftIO getLine >>= k
   eff (L (Write s k)) = liftIO (putStrLn s) >> k
   eff (R other      ) = TeletypeIOC (eff (handleCoercible other))
 
-runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
-runTeletypeRet i = runWriter . runState i . runTeletypeRetC
-
+-- A newtype defining embedded State and Writer effects
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving newtype (Applicative, Functor, Monad)
 
+runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
+runTeletypeRet i = runWriter . runState i . runTeletypeRetC
+
+-- Carrier instance needed to embed State and Writer effects (defined in TeletypeRetC)
 instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
   eff (L (Read k)) = do
     i <- TeletypeRetC get
@@ -61,6 +72,6 @@ instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC
 main :: IO ()
 main = do
   putStrLn "Hello, Haskell!"
-  print $ run (runTeletypeRet ["Testing"] read)
-  print $ run (runTeletypeRet ["input"] (write "output"))
-  print $ run (runTeletypeRet ["in"] (write "out1" >> write "out2"))
+  print $ run (runTeletypeRet ["input"] read)                        -- single input
+  print $ run (runTeletypeRet ["input"] (write "output"))            -- single output
+  print $ run (runTeletypeRet ["in"] (write "out1" >> write "out2")) -- multiple outputs
