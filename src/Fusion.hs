@@ -11,7 +11,12 @@
 
 -- Slight modification from https://github.com/fused-effects/fused-effects/blob/master/examples/Teletype.hs
 
-module Fusion where
+module Fusion
+  ( read
+  , write
+  , runTeletypeRet
+  )
+where
 
 import           Prelude                 hiding ( read )
 
