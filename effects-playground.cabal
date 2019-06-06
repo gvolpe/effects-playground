@@ -13,14 +13,17 @@ extra-source-files:  CHANGELOG.md
 library
   exposed-modules:     Fusion
                      , Poly
+                     , ReaderIO
   hs-source-dirs:      src
   ghc-options:         -fplugin=Polysemy.Plugin -O2 -flate-specialise -fspecialise-aggressively
   default-extensions:  DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables
   TypeApplications TypeOperators TypeFamilies BlockArguments
-  build-depends:       base
+  build-depends:       base >= 4.7 && < 5
                      , fused-effects >= 0.4.0.0
+                     , mtl
                      , polysemy >= 0.3.0.0
                      , polysemy-plugin >= 0.2.0.1
+                     , rio >= 0.1.9.2
   default-language:    Haskell2010
 
 executable effects-playground
@@ -29,9 +32,11 @@ executable effects-playground
   default-extensions:  DataKinds FlexibleContexts GADTs LambdaCase PolyKinds RankNTypes ScopedTypeVariables
   TypeApplications TypeOperators TypeFamilies BlockArguments
   hs-source-dirs:      app
-  build-depends:       base
+  build-depends:       base >= 4.7 && < 5
                      , effects-playground
                      , fused-effects >= 0.4.0.0
+                     , mtl
                      , polysemy >= 0.3.0.0
                      , polysemy-plugin >= 0.2.0.1
+                     , rio >= 0.1.9.2
   default-language:    Haskell2010
