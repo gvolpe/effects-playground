@@ -2,24 +2,17 @@ module Main where
 
 import           Prelude                 hiding ( read )
 
-import           Control.Effect                 ( run )
-import           Fusion                         ( runTeletypeRet
-                                                , read
-                                                , write
-                                                )
+import qualified Control.Effect                as F
+import qualified Polysemy                      as P
+import           Control.Monad.IO.Class         ( liftIO )
+import           Fusion
 import           Poly                           ( echoIO )
-import           Polysemy                       ( runM )
 
 fusedMain :: IO ()
-fusedMain = do
-  putStrLn "Hello, Haskell!"
-  print $ run (runTeletypeRet ["input"] read)                        -- single input
-  print $ run (runTeletypeRet ["input"] (write "output"))            -- single output
-  print $ run (runTeletypeRet ["in"] (write "out1" >> write "out2")) -- multiple outputs
+fusedMain = F.runM $ runTeletypeIO fusedEcho
 
--- echo forever
 polyMain :: IO ()
-polyMain = runM echoIO
+polyMain = P.runM echoIO
 
 main :: IO ()
-main = polyMain
+main = fusedMain
