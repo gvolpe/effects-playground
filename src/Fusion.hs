@@ -11,7 +11,7 @@
 
 -- Slight modification from https://github.com/fused-effects/fused-effects/blob/master/examples/Teletype.hs
 
-module Main where
+module Fusion where
 
 import           Prelude                 hiding ( read )
 
@@ -69,9 +69,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC
   eff (L (Write s k)) = TeletypeRetC (tell [s]) *> k
   eff (R other      ) = TeletypeRetC (eff (R (R (handleCoercible other))))
 
-main :: IO ()
-main = do
-  putStrLn "Hello, Haskell!"
-  print $ run (runTeletypeRet ["input"] read)                        -- single input
-  print $ run (runTeletypeRet ["input"] (write "output"))            -- single output
-  print $ run (runTeletypeRet ["in"] (write "out1" >> write "out2")) -- multiple outputs
