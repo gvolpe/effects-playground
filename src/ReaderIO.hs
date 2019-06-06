@@ -1,4 +1,8 @@
-module ReaderIO where
+module ReaderIO
+  ( echoR
+  , Env (..)
+  )
+where
 
 import           Control.Monad.Reader           ( ask )
 import           Data.Monoid                    ( (<>) )
