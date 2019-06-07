@@ -1,38 +1,45 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module ReaderIO where
 
 import           Control.Monad.Reader           ( ask )
 import           Data.Monoid                    ( (<>) )
-import           RIO                     hiding ( traceId )
+import           RIO
+import           System.IO                      ( getLine )
 
-type TraceId = String
+type TraceId = Utf8Builder
 
 data Env = Env
-  { traceId :: TraceId
-  , other :: String
-  } deriving (Show)
+  { appTraceId :: TraceId
+  , appLogFunc :: LogFunc
+  }
 
 class HasTraceId env where
-  traceIdL :: Lens' env TraceId
+  appTraceIdL :: Lens' env TraceId
 
 instance HasTraceId Env where
-  traceIdL = lens traceId (\x y -> x { traceId = y })
+  appTraceIdL = lens appTraceId (\x y -> x { appTraceId = y })
 
-tracedRead :: HasTraceId env => RIO env String
+instance HasLogFunc Env where
+  logFuncL = lens appLogFunc (\x y -> x { appLogFunc = y })
+
+tracedRead :: (HasLogFunc env, HasTraceId env) => RIO env String
 tracedRead = do
-  tid <- view traceIdL
-  liftIO $ putStrLn $ ">>> Read -> Trace-Id: " <> tid
+  tid <- view appTraceIdL
+  logInfo (">>> Read -> Trace-Id: " <> tid)
   liftIO getLine
 
-tracedWrite :: HasTraceId env => String -> RIO env ()
+tracedWrite :: (HasLogFunc env, HasTraceId env) => Utf8Builder -> RIO env ()
 tracedWrite i = do
-  tid <- view traceIdL
-  liftIO $ putStrLn $ ">>> Write -> Trace-Id: " <> tid
-  liftIO $ putStrLn i
+  tid <- view appTraceIdL
+  logInfo (">>> Write -> Trace-Id: " <> tid)
+  logInfo i
 
-echoR :: HasTraceId env => RIO env ()
+echoR :: (HasLogFunc env, HasTraceId env) => RIO env ()
 echoR = do
   i <- tracedRead
   case i of
     "" -> pure ()
-    _  -> tracedWrite i >> echoR
+    _  -> tracedWrite (displayShow i) >> echoR
 

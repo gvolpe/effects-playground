@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import           Prelude                 hiding ( read )
@@ -8,7 +10,7 @@ import           Control.Monad.IO.Class         ( liftIO )
 import           Fusion
 import           Poly                           ( echoIO )
 import           ReaderIO
-import           RIO                            ( runRIO )
+import           RIO
 
 fusedMain :: IO ()
 fusedMain = F.runM $ runTeletypeIO fusedEcho
@@ -17,7 +19,12 @@ polyMain :: IO ()
 polyMain = P.runM echoIO
 
 rioMain :: IO ()
-rioMain = runRIO (Env { traceId = "123", other = "" }) echoR
+rioMain = do
+  logging <- logOptionsHandle stdout False
+  let logOptions = setLogUseTime True $ setLogUseLoc True logging
+  withLogFunc logOptions $ \logFunc -> do
+    let env = Env { appTraceId = "123", appLogFunc = logFunc }
+    runRIO env echoR
 
 main :: IO ()
 main = rioMain
