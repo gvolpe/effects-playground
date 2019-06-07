@@ -1,28 +1,35 @@
-module ReaderIO
-  ( echoR
-  , Env (..)
-  )
-where
+module ReaderIO where
 
 import           Control.Monad.Reader           ( ask )
 import           Data.Monoid                    ( (<>) )
 import           RIO                     hiding ( traceId )
 
-newtype Env = Env { traceId :: String } deriving (Show)
+type TraceId = String
 
-tracedRead :: RIO Env String
+data Env = Env
+  { traceId :: TraceId
+  , other :: String
+  } deriving (Show)
+
+class HasTraceId env where
+  traceIdL :: Lens' env TraceId
+
+instance HasTraceId Env where
+  traceIdL = lens traceId (\x y -> x { traceId = y })
+
+tracedRead :: HasTraceId env => RIO env String
 tracedRead = do
-  env <- ask
-  liftIO $ putStrLn $ ">>> Read -> Trace-Id: " <> traceId env
+  tid <- view traceIdL
+  liftIO $ putStrLn $ ">>> Read -> Trace-Id: " <> tid
   liftIO getLine
 
-tracedWrite :: String -> RIO Env ()
+tracedWrite :: HasTraceId env => String -> RIO env ()
 tracedWrite i = do
-  env <- ask
-  liftIO $ putStrLn $ ">>> Write -> Trace-Id: " <> traceId env
+  tid <- view traceIdL
+  liftIO $ putStrLn $ ">>> Write -> Trace-Id: " <> tid
   liftIO $ putStrLn i
 
-echoR :: RIO Env ()
+echoR :: HasTraceId env => RIO env ()
 echoR = do
   i <- tracedRead
   case i of

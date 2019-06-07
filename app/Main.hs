@@ -7,9 +7,7 @@ import qualified Polysemy                      as P
 import           Control.Monad.IO.Class         ( liftIO )
 import           Fusion
 import           Poly                           ( echoIO )
-import           ReaderIO                       ( echoR
-                                                , Env(..)
-                                                )
+import           ReaderIO
 import           RIO                            ( runRIO )
 
 fusedMain :: IO ()
@@ -19,7 +17,7 @@ polyMain :: IO ()
 polyMain = P.runM echoIO
 
 rioMain :: IO ()
-rioMain = runRIO (Env "123") echoR
+rioMain = runRIO (Env { traceId = "123", other = "" }) echoR
 
 main :: IO ()
 main = rioMain
