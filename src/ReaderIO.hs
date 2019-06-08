@@ -1,7 +1,10 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module ReaderIO where
+module ReaderIO
+  ( echoRIO
+  )
+where
 
 import           Control.Monad.Reader           ( ask )
 import           Data.Monoid                    ( (<>) )
@@ -42,4 +45,12 @@ echoR = do
   case i of
     "" -> pure ()
     _  -> tracedWrite (displayShow i) >> echoR
+
+echoRIO :: IO ()
+echoRIO = do
+  logging <- logOptionsHandle stdout False
+  let logOptions = setLogUseTime True $ setLogUseLoc True logging
+  withLogFunc logOptions $ \logFunc -> do
+    let env = Env { appTraceId = "123", appLogFunc = logFunc }
+    runRIO env echoR
 
