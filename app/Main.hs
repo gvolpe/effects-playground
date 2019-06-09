@@ -1,21 +1,16 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Main where
 
 import           Prelude                 hiding ( read )
 
-import qualified Control.Effect                as F
-import qualified Polysemy                      as P
-import           Control.Monad.IO.Class         ( liftIO )
-import           Fusion
-import           Poly                           ( echoIO )
+import           Fusion                         ( fusedEchoIO )
+import           Poly                           ( echoPoly )
 import           ReaderIO                       ( echoRIO )
 
 fusedMain :: IO ()
-fusedMain = F.runM $ runTeletypeIO fusedEcho
+fusedMain = fusedEchoIO
 
 polyMain :: IO ()
-polyMain = P.runM echoIO
+polyMain = echoPoly
 
 rioMain :: IO ()
 rioMain = echoRIO

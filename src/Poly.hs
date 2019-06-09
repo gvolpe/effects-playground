@@ -3,7 +3,7 @@
 {-# LANGUAGE GADTs, FlexibleContexts, TypeOperators, DataKinds, PolyKinds #-}
 
 module Poly
-  ( echoIO
+  ( echoPoly
   )
 where
 
@@ -32,3 +32,5 @@ echo = do
 echoIO :: Sem '[Lift IO] ()
 echoIO = runTeletypeIO echo
 
+echoPoly :: IO ()
+echoPoly = runM echoIO

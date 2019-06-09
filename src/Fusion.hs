@@ -3,7 +3,10 @@
 
 -- Slight modification from https://github.com/fused-effects/fused-effects/blob/master/examples/Teletype.hs
 
-module Fusion where
+module Fusion
+  ( fusedEchoIO
+  )
+where
 
 import           Prelude                 hiding ( read )
 
@@ -50,4 +53,7 @@ fusedEcho = do
   case i of
     "" -> pure ()
     _  -> write i >> fusedEcho
+
+fusedEchoIO :: IO ()
+fusedEchoIO = runM $ runTeletypeIO fusedEcho
 
