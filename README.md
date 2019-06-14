@@ -12,6 +12,12 @@ Learning different effect systems by example
 
 - [transient](https://github.com/transient-haskell/transient): distributed, concurrent and parallel computations as primitives.
 
-### Common effects
+### Other effects
 
+- [capability](https://github.com/tweag/capability): Standard capability type classes for extensional effects.
 - [rio](https://github.com/commercialhaskell/rio): aka `ReaderT` + `IO`.
+
+### Classic effects
+
+- Tagless Final: aka final encoding
+- MTL: Monad Transformers Library

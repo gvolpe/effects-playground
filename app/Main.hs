@@ -2,10 +2,12 @@ module Main where
 
 import           Prelude                 hiding ( read )
 
+import           Cap                            ( echoCap )
 import           Cloud                          ( cloudEcho )
 import           Fusion                         ( fusedEchoIO )
 import           Poly                           ( echoPoly )
 import           ReaderIO                       ( echoRIO )
+import           Tagless
 
 cloudMain :: IO ()
 cloudMain = cloudEcho
@@ -19,5 +21,8 @@ polyMain = echoPoly
 rioMain :: IO ()
 rioMain = echoRIO
 
+taglessMain :: IO ()
+taglessMain = echoTagless
+
 main :: IO ()
-main = cloudMain
+main = echoCap
